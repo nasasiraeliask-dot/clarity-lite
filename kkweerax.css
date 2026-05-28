@@ -1148,7 +1148,7 @@ footer p { font-size: 0.9rem; color: var(--text-muted); }
 }
 
 .search-result-item:hover {
-    background: rgba(19, 152, 97, 0.15);
+    background: rgba(34, 23, 234, 0.15);
 }
 
 .result-matched-text {
@@ -1183,5 +1183,61 @@ footer p { font-size: 0.9rem; color: var(--text-muted); }
         width: 100%;
         order: 3; /* Forces search beneath the branding bar layout on mobile viewports */
         margin: 5px 0 0 0;
+    }
+}
+
+/* ==========================================================================
+   16. FLOATING ACTIONS SIDEBAR WITH CUSTOM IMAGE ICONS
+   ========================================================================== */
+.floating-actions-sidebar {
+    position: fixed;
+    bottom: 30px;
+    right: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 4000; /* Stays above content layers while scrolling */
+}
+
+/* Base Floating Action Button Circular Container */
+.action-fab {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* Ensures the image doesn't bleed past the rounded circle */
+    background: var(--card-dark); /* Falls back to your dark theme slate background if image is transparent */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition: var(--transition);
+}
+
+/* Forces your custom images to fill the circle beautifully */
+.fab-custom-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Crops the image proportionally inside the circle */
+}
+
+/* Smooth slide out and brightness effect when hovered on desktop screens */
+.action-fab:hover {
+    transform: translateX(-5px) scale(1.08);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+    border-color: var(--light-blue);
+}
+
+/* Mobile Responsiveness adjustments */
+@media (max-width: 480px) {
+    .floating-actions-sidebar {
+        bottom: 20px;
+        right: 15px;
+        gap: 10px;
+    }
+    
+    .action-fab {
+        width: 46px;
+        height: 46px;
     }
 }
