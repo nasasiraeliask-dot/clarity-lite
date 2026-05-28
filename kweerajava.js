@@ -8,6 +8,8 @@ document.addEventListener("DOMContentLoaded", () => {
     injectLiveDynamicCounter();
     revealOnScroll(); // Triggers display check immediately on initialization
     initDeadlineCountdown();
+    initImageLightbox();
+    initPageSearchEngine(); // <-- Injected here to manage query lookups
 });
 
 /**
@@ -162,4 +164,105 @@ function initDeadlineCountdown() {
 
     updateClock();
     const clockInterval = setInterval(updateClock, 1000);
+}
+
+/**
+ * 7. Single-Page Live Context Search Engine
+ * Indices key element contents across the single page document view to generate smooth-scroll shortcuts.
+ */
+function initPageSearchEngine() {
+    const input = document.getElementById("page-search-input");
+    const dropdown = document.getElementById("search-results-dropdown");
+    const clearBtn = document.getElementById("clear-search-btn");
+
+    if (!input || !dropdown || !clearBtn) return;
+
+    // List of key sections to track content vectors within your single page layout
+    const targetSections = [
+        { id: "media-resources", name: "Vault Media Hub" },
+        { id: "pricing", name: "Pricing & Packages" },
+        { id: "faq", name: "Frequently Asked Questions" },
+        { id: "warning", name: "Warning Checklist" },
+        { id: "showcase", name: "Sample Showcase" },
+        { id: "process", name: "Evaluation Steps" },
+        { id: "team", name: "Our Engineers" }
+    ];
+
+    input.addEventListener("input", () => {
+        const query = input.value.toLowerCase().trim();
+        dropdown.innerHTML = "";
+
+        if (!query) {
+            dropdown.style.display = "none";
+            clearBtn.style.display = "none";
+            return;
+        }
+
+        clearBtn.style.display = "block";
+        let matchCount = 0;
+
+        targetSections.forEach(section => {
+            const element = document.getElementById(section.id) || document.querySelector(`.${section.id}-section`) || document.querySelector(`.${section.id}`);
+            if (!element) return;
+
+            // Extract all readable textual data within the target node boundaries
+            const targetText = element.innerText.toLowerCase();
+
+            if (targetText.includes(query)) {
+                matchCount++;
+                
+                // Extract a tiny preview snippet using regex or indexing limits
+                const matchIndex = targetText.indexOf(query);
+                let snippet = element.innerText.substring(matchIndex, matchIndex + 40) + "...";
+
+                const resultItem = document.createElement("div");
+                resultItem.className = "search-result-item";
+                resultItem.innerHTML = `
+                    <span class="result-matched-text">"${snippet}"</span>
+                    <span class="result-section-label">Found in ${section.name}</span>
+                `;
+
+                // Handle click behavior to trigger a smooth viewport jump
+                resultItem.addEventListener("click", () => {
+                    dropdown.style.display = "none";
+                    input.value = "";
+                    clearBtn.style.display = "none";
+
+                    // Force scroll parameters
+                    element.scrollIntoView({ behavior: "smooth", block: "start" });
+
+                    // Highlight visual flash indicator trick to guide user focus tracking
+                    element.style.transition = "outline 0.3s ease";
+                    element.style.outline = "2px solid var(--light-blue)";
+                    setTimeout(() => {
+                        element.style.outline = "2px solid transparent";
+                    }, 1200);
+                });
+
+                dropdown.appendChild(resultItem);
+            }
+        });
+
+        if (matchCount === 0) {
+            dropdown.innerHTML = `<div class="no-results-message">No matching metrics found. Try another phrase...</div>`;
+        }
+
+        dropdown.style.display = "block";
+    });
+
+    // Clear string input helper
+    clearBtn.addEventListener("click", () => {
+        input.value = "";
+        dropdown.innerHTML = "";
+        dropdown.style.display = "none";
+        clearBtn.style.display = "none";
+        input.focus();
+    });
+
+    // Hide suggestions menu if user clicks elsewhere
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".header-search-container")) {
+            dropdown.style.display = "none";
+        }
+    });
 }
